@@ -1,0 +1,74 @@
+//
+//  JumpPrefix.pch
+//  GoogleOpt
+//
+//  Created by jumpapp1 on 2019/10/13.
+//  Copyright © 2019年 zb. All rights reserved.
+//
+
+#import "AppDelegate.h"
+#import "OTPGenerator.h"
+#import "TOTPGenerator.h"
+#import "JumpPublicAction.h"
+#import "SecurityNSString.h"
+
+#ifndef JumpPrefix_pch
+#define JumpPrefix_pch
+
+
+//屏幕宽高
+#define kWidth  [UIScreen mainScreen].bounds.size.width
+#define kHeight [UIScreen mainScreen].bounds.size.height
+
+//设置颜色
+#define ColorA(r, g, b, a) [UIColor colorWithRed:(r)/255.0 green:(g)/255.0 blue:(b)/255.0 alpha:(a)/255.0]
+#define RGB(r, g, b) ColorA((r), (g), (b), 255)
+
+//公共颜色
+#define BackGroundColor RGB(247,247,247)
+#define CustomerBlue RGB(0,122,255)
+#define CustomerRed RGB(252, 74, 74)
+#define CustomerPlacehodel RGB(153, 153, 153)
+#define CustomerYellow RGB(255, 180, 1)
+
+//打印
+#ifdef DEBUG
+#define JumpLog(...) NSLog(__VA_ARGS__)
+#else
+#define JumpLog(...)
+#endif
+
+//通知
+#define KNotification [NSNotificationCenter defaultCenter]
+
+//强弱引用
+#define L2CWeakSelf(type)  __weak typeof(type) weak##type = type;
+#define L2CStrongSelf(type) __strong typeof(type) type = weak##type;
+
+//AppDelegate
+#define L2CAppDelegate (AppDelegate *)[UIApplication sharedApplication].delegate
+#define KeyWindow [UIApplication sharedApplication].keyWindow
+#define TOPWindow [[[UIApplication sharedApplication] windows] lastObject]
+
+//使得nil为@""
+#define SafeString(string) [SecurityNSString safeStr:string]
+
+//适配iPhoneX
+#define L2C_iPhoneX ((kHeight == 812.f || kHeight == 896.f) ? YES : NO)
+// 电池栏高度
+#define  L2C_StatusBarHeight      (L2C_iPhoneX ? 44.f : 20.f)
+// 导航栏高度.
+#define  L2C_NavigationBarHeight  44.f
+// tabBar高度
+#define  L2C_TabbarHeight         (L2C_iPhoneX ? (49.f+34.f) : 49.f)
+// 安全区域高度
+#define  L2C_TabbarSafeBottomMargin         (L2C_iPhoneX ? 34.f : 10.f)
+//toolbar高度
+#define L2C_ToolBarHeight (L2C_iPhoneX ? (44.f+L2C_TabbarSafeBottomMargin) : 44.f)
+// 导航栏+电池栏高度.
+#define  L2C_StatusBarAndNavigationBarHeight  (L2C_iPhoneX ? 88.f : 64.f)
+//安全区域
+#define L2C_ViewSafeAreInsets(view) ({UIEdgeInsets insets; if(@available(iOS 11.0, *)) {insets = view.safeAreaInsets;} else {insets = UIEdgeInsetsZero;} insets;}
+
+
+#endif /* JumpPrefix_pch */

@@ -1,0 +1,190 @@
+//
+//  ScanningDeviceViewController.m
+//  JumpHousekeeper
+//
+//  Created by jumpapp1 on 2019/10/13.
+//  Copyright © 2019年 zhoubin. All rights reserved.
+//
+
+#import "ScanningDeviceViewController.h"
+#import "QiCodePreviewView.h"
+#import "QiCodeManager.h"
+
+@interface ScanningDeviceViewController ()<UIImagePickerControllerDelegate, UINavigationControllerDelegate>
+
+//扫描区域view
+@property (nonatomic, strong) QiCodePreviewView *previewView;
+
+@property (nonatomic, strong) QiCodeManager *codeManager;
+
+@property (strong,nonatomic) NSMutableArray *codeArray;
+
+@end
+
+@implementation ScanningDeviceViewController
+
+
+- (void)viewWillAppear:(BOOL)animated {
+    
+    [super viewWillAppear:animated];
+    
+    [self startScanning];
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+    
+    [super viewWillDisappear:animated];
+    
+    [_codeManager stopScanning];
+}
+
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+    [self creatUI];
+}
+
+
+
+-(void)creatUI{
+
+    self.navigationItem.title = @"扫描二维码";
+
+    //二维码界面
+    _previewView = [[QiCodePreviewView alloc] initWithFrame:self.view.bounds];
+
+    _previewView.autoresizingMask = UIViewAutoresizingFlexibleHeight;
+
+    [self.view addSubview:_previewView];
+
+    L2CWeakSelf(self);
+
+    _codeManager = [[QiCodeManager alloc] initWithPreviewView:_previewView completion:^{
+
+        [weakself startScanning];
+
+    }];
+}
+
+
+#pragma mark - 从相册中获取到的二维码
+
+- (void)photo:(id)sender {
+
+    L2CWeakSelf(self);
+
+    //    检测用户是否开启了访问相册的权限
+    BOOL isopen = [JumpPublicAction isopenPhoto];
+
+    if(isopen){
+
+        [_codeManager presentPhotoLibraryWithRooter:self callback:^(NSString * _Nonnull code) {
+
+            [weakself numberStr:code];
+
+        }];
+
+    }else{
+
+        UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"去开启访问相册权限?" message:nil preferredStyle:UIAlertControllerStyleAlert];
+
+        UIAlertAction *ok = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+
+            [JumpPublicAction openfromSetting];
+
+        }];
+
+        UIAlertAction *cancel = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleDestructive handler:^(UIAlertAction *action) {
+        }];
+
+        [alertController addAction:cancel];
+        [alertController addAction:ok];
+
+        [self presentViewController:alertController animated:YES completion:nil];
+    }
+}
+
+
+#pragma mark - 直接扫描的二维码
+
+- (void)startScanning {
+
+    L2CWeakSelf(self);
+
+    [_codeManager startScanningWithCallback:^(NSString * _Nonnull code) {
+
+        [weakself numberStr:code];
+
+    } autoStop:YES];
+}
+
+#pragma mark --- 扫描二维码获取设备状态
+
+-(void)numberStr:(NSString *)code{
+    
+    if([code rangeOfString:@"="].location !=NSNotFound && [code rangeOfString:@"&"].location !=NSNotFound)
+    {
+        NSRange range1 = [code rangeOfString:@"="];//匹配得到的下标
+        NSString *rangStr1 = [code substringFromIndex:range1.location+1];//截取掉之前的字符串
+        NSRange range2 = [rangStr1 rangeOfString:@"&"];//匹配得到的下标
+        NSString *newCode = [rangStr1 substringToIndex:range2.location];//截取掉之后的字符串
+        
+        
+        NSData *secretData = [newCode dataUsingEncoding:NSASCIIStringEncoding];
+        
+        TOTPGenerator *generator = [[TOTPGenerator alloc] initWithSecret:secretData
+                                                               algorithm:kOTPGeneratorSHA1Algorithm
+                                                                  digits:6
+                                                                  period:60];
+        
+        NSString *str = [generator generateOTPForDate:nil];//传nil默认为当前时间
+        
+        NSString *str3 = [NSString stringWithFormat:@"生成的动态码为：%@",str];
+        
+        
+        self.codeArray = [NSMutableArray array];
+        
+        //本身有值就先加进去
+        NSArray *array = [[NSUserDefaults standardUserDefaults] objectForKey:@"codeArray"];
+        
+        [self.codeArray addObjectsFromArray:array];
+        
+        NSDictionary *dict1 = @{@"code":str,@"account":@"",@"time":@"60"};
+        
+        [self.codeArray addObject:dict1];
+        
+        //存入数组并同步
+        [[NSUserDefaults standardUserDefaults] setObject:self.codeArray forKey:@"codeArray"];
+        
+        [[NSUserDefaults standardUserDefaults] synchronize];
+        
+        [self.navigationController popViewControllerAnimated:YES];
+        
+        [KNotification postNotificationName:@"JumpCodelistTableViewController" object:nil userInfo:nil];
+        
+        [self messageInfo:str3];
+
+    }else{
+        
+        [self messageInfo:@"未扫描到有效设备码"];
+    }
+}
+
+
+
+#pragma mark -- 提示信息
+
+-(void)messageInfo:(NSString *)message{
+    
+    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"提示" message:message preferredStyle:UIAlertControllerStyleAlert];
+    
+    UIAlertAction *ok = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil];
+    
+    [alertController addAction:ok];
+    
+    [self presentViewController:alertController animated:YES completion:nil];
+    
+}
+
+@end

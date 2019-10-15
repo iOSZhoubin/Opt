@@ -1,0 +1,158 @@
+//
+//  JumpCodelistTableViewController.m
+//  GoogleOpt
+//
+//  Created by jumpapp1 on 2019/10/14.
+//  Copyright © 2019年 zb. All rights reserved.
+//
+
+#import "JumpCodelistTableViewController.h"
+#import "ScanningDeviceViewController.h"
+#import "JumpInputViewController.h"
+#import "CodellistTableViewCell.h"
+
+@interface JumpCodelistTableViewController ()
+
+@property (strong,nonatomic) NSMutableArray *codeArray;
+
+@end
+
+@implementation JumpCodelistTableViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+    self.navigationItem.title = @"Jump Authenticator";
+    
+    [self.tableView registerNib:[UINib nibWithNibName:@"CodellistTableViewCell" bundle:nil] forCellReuseIdentifier:@"CodellistTableViewCell"];
+    
+    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc]initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(addAction)];
+    
+    self.codeArray = [NSMutableArray array];
+    
+    //本身有值就先加进去
+    NSArray *array = [[NSUserDefaults standardUserDefaults] objectForKey:@"codeArray"];
+        
+    [self.codeArray addObjectsFromArray:array];
+    
+    [KNotification addObserver:self selector:@selector(notifi:) name:@"JumpCodelistTableViewController" object:nil];
+
+}
+
+- (void)notifi:(NSNotification *)note{
+    
+    self.codeArray = [NSMutableArray array];
+
+    //本身有值就先加进去
+    NSArray *array = [[NSUserDefaults standardUserDefaults] objectForKey:@"codeArray"];
+    
+    [self.codeArray addObjectsFromArray:array];
+    
+    [self.tableView reloadData];
+}
+
+#pragma mark --- 增加
+
+-(void)addAction{
+    
+    L2CWeakSelf(self);
+    
+    UIAlertController * alertController = [UIAlertController alertControllerWithTitle:@"设置" message: nil preferredStyle:UIAlertControllerStyleActionSheet];
+    
+    [alertController addAction: [UIAlertAction actionWithTitle:@"扫描二维码" style: UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+        
+        [weakself scanning];
+        
+    }]];
+    
+    [alertController addAction: [UIAlertAction actionWithTitle:@"手动输入验证码" style: UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+        
+        [weakself inputCode];
+        
+    }]];
+    
+    [alertController addAction: [UIAlertAction actionWithTitle:@"取消" style: UIAlertActionStyleCancel handler:nil]];
+    
+    [self presentViewController:alertController animated:YES completion:nil];
+}
+
+#pragma mark --- 扫描条形码
+
+-(void)scanning{
+    
+    ScanningDeviceViewController *vc = [[ScanningDeviceViewController alloc]init];
+    
+    [self.navigationController pushViewController:vc animated:YES];
+}
+
+
+#pragma mark --- 手动输入验证码
+
+-(void)inputCode{
+    
+    JumpInputViewController *vc = [[JumpInputViewController alloc]init];
+        
+    [self.navigationController pushViewController:vc animated:YES];
+}
+
+
+#pragma mark - Table view data source
+
+-(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
+    
+    return 100;
+}
+
+-(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
+    
+    return self.codeArray.count;
+}
+
+-(UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
+    
+    CodellistTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"CodellistTableViewCell" forIndexPath:indexPath];
+    
+    [cell refreshListWithDict:self.codeArray[indexPath.row]];
+    
+    return cell;
+}
+
+
+- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+    return YES;
+}
+
+- (NSArray<UITableViewRowAction *> *)tableView:(UITableView *)tableView editActionsForRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+    L2CWeakSelf(self);
+    
+    UITableViewRowAction *delete = [UITableViewRowAction rowActionWithStyle:UITableViewRowActionStyleDestructive title:@"删除" handler:^(UITableViewRowAction * _Nonnull action, NSIndexPath * _Nonnull indexPath) {
+        
+        UIAlertController * alertController = [UIAlertController alertControllerWithTitle: @"确认删除?" message: nil preferredStyle:UIAlertControllerStyleActionSheet];
+        
+        [alertController addAction: [UIAlertAction actionWithTitle:@"确认" style: UIAlertActionStyleDestructive handler:^(UIAlertAction *action) {
+            
+            [weakself.codeArray removeObjectAtIndex:indexPath.row];
+            
+            [tableView reloadData];
+            
+        }]];
+        
+        [alertController addAction: [UIAlertAction actionWithTitle:@"取消" style: UIAlertActionStyleCancel handler:nil]];
+        
+        [weakself presentViewController:alertController animated:YES completion:nil];
+        
+    }];
+    
+    return @[delete];
+    
+}
+
+-(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
+    
+    [tableView deselectRowAtIndexPath:indexPath animated:NO];
+}
+
+
+@end

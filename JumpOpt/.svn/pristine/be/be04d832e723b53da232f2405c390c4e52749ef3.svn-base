@@ -1,0 +1,41 @@
+//
+//  CodellistTableViewCell.m
+//  GoogleOpt
+//
+//  Created by jumpapp1 on 2019/10/14.
+//  Copyright © 2019年 zb. All rights reserved.
+//
+
+#import "CodellistTableViewCell.h"
+
+@interface CodellistTableViewCell()
+
+//动态码
+@property (weak, nonatomic) IBOutlet UILabel *codeL;
+//用户名
+@property (weak, nonatomic) IBOutlet UILabel *accountL;
+//倒计时
+@property (weak, nonatomic) IBOutlet UILabel *timeL;
+
+@end
+
+@implementation CodellistTableViewCell
+
+- (void)awakeFromNib {
+    [super awakeFromNib];
+    
+}
+
+
+-(void)refreshListWithDict:(NSDictionary *)dict{
+    
+    self.codeL.text = dict[@"code"];
+    
+    self.accountL.text = dict[@"account"];
+    
+    self.timeL.text = dict[@"time"];
+}
+
+
+
+@end
