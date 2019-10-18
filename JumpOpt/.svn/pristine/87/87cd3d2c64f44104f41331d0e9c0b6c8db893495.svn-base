@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="14460.31" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14460.20"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="JumpPrivacyViewController">
+            <connections>
+                <outlet property="view" destination="i5M-Pr-FkT" id="sfx-zR-JGt"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view clearsContextBeforeDrawing="NO" contentMode="scaleToFill" id="i5M-Pr-FkT">
+            <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="Ic1-eK-fXK">
+                    <rect key="frame" x="5" y="30" width="365" height="632"/>
+                    <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    <mutableString key="text">本《最终用户许可协议》（以下简称“协议”）是您（自然人、法人、政府机构或其他组织）与交大捷普之间关于安装、使用、复制交大捷普安全产品独立或内嵌软件（以下简称"软件"）的具有法律效力的协议。任何与本协议有关的软件、电子文档都应是按本协议的条款而许可您使用的。同时本协议亦适用于本软件的任何后续版本和升级版本。　在您使用本软件之前，请务必仔细阅读本协议中的各项条款，包括使用限制、保证与责任限制、免责条款等。
+除非您接受本协议条款，否则您无权安装、使用本软件及其相关文档。您的安装使用行为将视为对本协议的接受，并同意接受本协议各项条款的约束。
+
+1．知识产权
+
+本软件系统及相关文档均为交大捷普独自开发的产品，其知识产权归交大捷普所有。本软件系统及相关文档受中华人民共和国著作权法、其他知识产权法、及相关国际公约的保护。
+
+2．许可范围
+
+在您依据您与交大捷普签订的产品购销合同或类似商业合同获得交大捷普产品所有权及产品许可证后，本协议授予您，且只授予您对本软件系统及相关文档的非独占性的使用许可，允许您依据本协议规定的用途使用本软件，但本软件系统及相关文档的所有权及相关知识产权仍归交大捷普所有。
+
+3．使用限制
+
+未经交大捷普事先书面授权，您不得进行以下行为，否则，将构成对交大捷普知识产权的侵犯，或者将造成您本人及/或第三方计算机系统的损害。因此，给交大捷普、您本人及/或第三方计算机系统及相应财产造成的可能损失，由您本人承担：
+
+3．1 交大捷普提供的或您获得的有关本软件的任何信息只能由您为本协议许可的目的而使用，不得披露给任何第三方或用于创建任何与本软件风格基本相似的软件，或用于其他商业用途。
+
+3．2 对于本软件的二进制代码、源代码、文字、图片等相关信息，不得借助本软件发展与之有关的衍生产品、作品、服务，不得向任何第三方公开发布修改后的软件。
+
+3．3 不得对该软件进行反向工程、反编译或反汇编、或以其他方式尝试发现本软件的源代码。
+
+3．4 不得出售、转让、出租、租借、分发、出口、进口本软件及相关文档或其任何部分。
+
+4．交大捷普软件的各个新版本
+
+交大捷普保留为其软件增加附加特点和功能，或者提供程序修补、更新和升级的权利。您承认和同意交大捷普没有义务向您提供本软件及相关文档的任何后续版本或升级版本，除非您已购买该后续版本或升级版本，或交大捷普在产品销售合同中与您另有约定。
+
+5．保证与责任限制
+
+5．1 交大捷普保证本软件符合其产品说明书中规定的性能要求。
+
+5．2 本保证不包括因您错误使用、人为损坏、非法使用、他人的行为、或任何超出交大捷普合理控制范围的事件所造成的问题。
+
+5．3 交大捷普不保证本软件没有错误，或者能够不间断的操作。交大捷普不保证本软件在任何情况下在任何计算机上均有效。
+
+5．4 损害赔偿责任的限制。如果本软件的性能不能达到本协议第5.1条的承诺标准，并且经过维修、修补、或者替换该软件或含有该软
+件的产品仍不能达到该承诺标准，您只能因直接损害从交大捷普及其代理商处获得赔偿，且该赔偿金额以您购买该软件时支付的金额为上限。 您不能因任何其他间接损害获得赔偿，包括但不限于营业利润损失、业务中断、业务信息、文档、数据丢失或其他间接或附带的损害等，即使已通知交大捷普有可能发生该等损失的，亦是如此。
+
+6．许可终止
+如果您未能遵守本协议的任何约定，交大捷普有权随时终止您对本软件及其相关文档的使用许可。终止许可后，您应立即将本软件系统及文档销毁或返还交大捷普。
+
+7．其他
+
+7．1 本协议所规定的任何条款的部分或全部无效，不影响其它条款的效力。
+
+7．2 本协议受中华人民共和国法律的管辖。
+
+7．3 本协议与由您签署的通过谈判订立的任何书面协议具有同等法律效力。
+</mutableString>
+                    <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                    <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                </textView>
+            </subviews>
+            <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <constraints>
+                <constraint firstItem="Ic1-eK-fXK" firstAttribute="top" secondItem="Q5M-cg-NOt" secondAttribute="top" constant="10" id="5uI-g9-pVq"/>
+                <constraint firstItem="Q5M-cg-NOt" firstAttribute="trailing" secondItem="Ic1-eK-fXK" secondAttribute="trailing" constant="5" id="dIz-AP-qS0"/>
+                <constraint firstItem="Q5M-cg-NOt" firstAttribute="bottom" secondItem="Ic1-eK-fXK" secondAttribute="bottom" constant="5" id="leC-wa-T2b"/>
+                <constraint firstItem="Ic1-eK-fXK" firstAttribute="leading" secondItem="Q5M-cg-NOt" secondAttribute="leading" constant="5" id="nlb-Da-Fd9"/>
+            </constraints>
+            <viewLayoutGuide key="safeArea" id="Q5M-cg-NOt"/>
+        </view>
+    </objects>
+</document>

@@ -1,0 +1,97 @@
+//
+//  JumpSupportViewController.m
+//  JumpHousekeeper
+//
+//  Created by jumpapp1 on 2019/1/23.
+//  Copyright © 2019年 zhoubin. All rights reserved.
+//
+
+#import "JumpSupportViewController.h"
+
+@interface JumpSupportViewController ()
+
+@property (weak, nonatomic) IBOutlet NSLayoutConstraint *topH;
+//电话1
+@property (weak, nonatomic) IBOutlet UILabel *telephone1;
+//电话2
+@property (weak, nonatomic) IBOutlet UILabel *telephone2;
+//邮箱
+@property (weak, nonatomic) IBOutlet UILabel *email;
+//邮编
+@property (weak, nonatomic) IBOutlet UILabel *code;
+//网址
+@property (weak, nonatomic) IBOutlet UILabel *webStr;
+//地址
+@property (weak, nonatomic) IBOutlet UILabel *address;
+
+@end
+
+@implementation JumpSupportViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+
+    self.topH.constant = L2C_StatusBarAndNavigationBarHeight;
+    
+    self.navigationItem.title = @"关于我们";
+}
+
+
+
+
+#pragma mark --- 打电话，邮件
+
+- (IBAction)callPhone:(UIButton *)sender {
+    
+    
+    self.telephone1.text = @"029-88333000";
+    self.telephone2.text = @"400-613-1868";
+    self.email.text = @"support@jump.net.cn";
+    self.webStr.text = @"http://www.jump.net.cn";
+    self.address.text = @"西安市高新技术产业开发区科技二路72号捷普大厦";
+    self.code.text =  @"710075";
+    
+    NSString *str1 = [NSString stringWithFormat:@"拨打电话:%@",self.telephone1.text];
+    NSString *str2 = [NSString stringWithFormat:@"tel:%@",self.telephone1.text];
+
+    NSString *str3 = [NSString stringWithFormat:@"拨打电话:%@",self.telephone2.text];
+    NSString *str4 = [NSString stringWithFormat:@"tel:%@",self.telephone2.text];
+    
+    NSString *str5 = [NSString stringWithFormat:@"发送邮件:%@",self.email.text];
+    NSString *str6 = [NSString stringWithFormat:@"mailto://%@",self.email.text];
+    
+    NSString *str7 = [NSString stringWithFormat:@"访问网站:%@",self.webStr.text];
+    
+    UIAlertController * alertController = [UIAlertController alertControllerWithTitle: @"快捷支持" message: nil preferredStyle:UIAlertControllerStyleActionSheet];
+    
+    [alertController addAction: [UIAlertAction actionWithTitle:str1 style: UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+        
+        [[UIApplication sharedApplication]openURL:[NSURL URLWithString:str2]];
+        
+    }]];
+    
+    [alertController addAction: [UIAlertAction actionWithTitle:str3 style: UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+        
+        [[UIApplication sharedApplication]openURL:[NSURL URLWithString:str4]];
+        
+    }]];
+    
+    [alertController addAction: [UIAlertAction actionWithTitle:str5 style: UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+        
+       [[UIApplication sharedApplication]openURL:[NSURL URLWithString:str6]];
+        
+    }]];
+    
+    [alertController addAction: [UIAlertAction actionWithTitle:str7 style: UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+        
+        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:self.webStr.text]];
+        
+    }]];
+    
+    [alertController addAction: [UIAlertAction actionWithTitle:@"取消" style: UIAlertActionStyleCancel handler:nil]];
+    
+    [self presentViewController:alertController animated:YES completion:nil];
+   
+}
+
+@end

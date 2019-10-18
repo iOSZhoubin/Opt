@@ -1,0 +1,224 @@
+//
+//  ScanningDeviceViewController.m
+//  JumpHousekeeper
+//
+//  Created by jumpapp1 on 2019/10/13.
+//  Copyright © 2019年 zhoubin. All rights reserved.
+//
+
+#import "ScanningDeviceViewController.h"
+#import "QiCodePreviewView.h"
+#import "QiCodeManager.h"
+#import "GTMStringEncoding.h" 
+
+@interface ScanningDeviceViewController ()<UIImagePickerControllerDelegate, UINavigationControllerDelegate>
+
+//扫描区域view
+@property (nonatomic, strong) QiCodePreviewView *previewView;
+
+@property (nonatomic, strong) QiCodeManager *codeManager;
+
+@property (strong,nonatomic) NSMutableArray *codeArray;
+
+@end
+
+@implementation ScanningDeviceViewController
+
+
+- (void)viewWillAppear:(BOOL)animated {
+    
+    [super viewWillAppear:animated];
+    
+    [self startScanning];
+}
+
+- (void)viewWillDisappear:(BOOL)animated {
+    
+    [super viewWillDisappear:animated];
+    
+    [_codeManager stopScanning];
+}
+
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+    
+    [self creatUI];
+}
+
+
+
+-(void)creatUI{
+
+    self.navigationItem.title = @"扫描二维码";
+
+    //二维码界面
+    _previewView = [[QiCodePreviewView alloc] initWithFrame:self.view.bounds];
+
+    _previewView.autoresizingMask = UIViewAutoresizingFlexibleHeight;
+
+    [self.view addSubview:_previewView];
+
+    L2CWeakSelf(self);
+
+    _codeManager = [[QiCodeManager alloc] initWithPreviewView:_previewView completion:^{
+
+        [weakself startScanning];
+
+    }];
+}
+
+
+#pragma mark - 从相册中获取到的二维码
+
+- (void)photo:(id)sender {
+
+    L2CWeakSelf(self);
+
+    //    检测用户是否开启了访问相册的权限
+    BOOL isopen = [JumpPublicAction isopenPhoto];
+
+    if(isopen){
+
+        [_codeManager presentPhotoLibraryWithRooter:self callback:^(NSString * _Nonnull code) {
+
+            [weakself numberStr:code];
+
+        }];
+
+    }else{
+
+        UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"去开启访问相册权限?" message:nil preferredStyle:UIAlertControllerStyleAlert];
+
+        UIAlertAction *ok = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction *action) {
+
+            [JumpPublicAction openfromSetting];
+
+        }];
+
+        UIAlertAction *cancel = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleDestructive handler:^(UIAlertAction *action) {
+        }];
+
+        [alertController addAction:cancel];
+        [alertController addAction:ok];
+
+        [self presentViewController:alertController animated:YES completion:nil];
+    }
+}
+
+
+#pragma mark - 直接扫描的二维码
+
+- (void)startScanning {
+
+    L2CWeakSelf(self);
+
+    [_codeManager startScanningWithCallback:^(NSString * _Nonnull code) {
+
+        [weakself numberStr:code];
+
+    } autoStop:YES];
+}
+
+#pragma mark --- 扫描二维码获取设备状态
+
+-(void)numberStr:(NSString *)code{
+    
+    if([code rangeOfString:@"secretJump="].location !=NSNotFound && [code rangeOfString:@"&"].location !=NSNotFound && [code rangeOfString:@"issuer="].location !=NSNotFound)
+    {
+        //otpauth://totp/jsms@10.0.8.112?secretJump=Q5TU3AFK577FA3PVSAEWMVDKVQ&issuer=liupd
+        NSString *rangStr1 = [code substringFromIndex:15];//截取掉之前的字符串
+
+        NSRange range = [rangStr1 rangeOfString:@"?"];//匹配得到的下标
+        
+        NSRange range1 = [code rangeOfString:@"?"];//匹配得到的下标
+
+        NSString *deviceName = [rangStr1 substringToIndex:range.location];//截取掉之前的字符串
+        
+        NSString *newCode = [code substringFromIndex:range1.location+1];//截取掉之前的字符串
+        
+        NSArray *array1 = [newCode componentsSeparatedByString:@"&"];
+
+        NSString *secret = array1[0];
+        NSString *user = array1[1];
+
+        NSRange range3 = [user rangeOfString:@"issuer="];//匹配得到的下标
+        NSString *account = [user substringFromIndex:range3.location + 7];//截取掉之前的字符串
+
+        NSRange range2 = [secret rangeOfString:@"secretJump="];//匹配得到的下标
+        NSString *deviceCode = [secret substringFromIndex:range2.location + 11];//截取掉之前的字符串
+
+        NSData *secretData = [self base32Decode:deviceCode];
+        
+        TOTPGenerator *generator = [[TOTPGenerator alloc] initWithSecret:secretData
+                                                               algorithm:kOTPGeneratorSHA1Algorithm
+                                                                  digits:6
+                                                                  period:60];
+        
+        NSString *str = [generator generateOTPForDate:nil];//传nil默认为当前时间
+        
+        self.codeArray = [NSMutableArray array];
+        
+        //本身有值就先加进去
+        NSArray *array = [[NSUserDefaults standardUserDefaults] objectForKey:@"codeArray"];
+        
+        [self.codeArray addObjectsFromArray:array];
+        
+        NSDictionary *dict1 = @{@"deviceCode":SafeString(code),@"code":str,@"account":SafeString(account),@"deviceName":SafeString(deviceName)};
+        
+        [self.codeArray addObject:dict1];
+        
+        //存入数组并同步
+        [[NSUserDefaults standardUserDefaults] setObject:self.codeArray forKey:@"codeArray"];
+        
+        [[NSUserDefaults standardUserDefaults] synchronize];
+        
+        if(self.isTimer == NO){
+            
+            [KNotification postNotificationName:@"startTimer" object:nil userInfo:@{@"start":@"1"}];
+            
+        }
+        
+        [KNotification postNotificationName:@"JumpCodelistTableViewController" object:nil userInfo:nil];
+        
+        [self.navigationController popViewControllerAnimated:YES];
+
+    }else{
+        
+        [self messageInfo:@"未扫描到有效设备码"];
+        
+        [self startScanning];
+    }
+}
+
+
+
+#pragma mark -- 提示信息
+
+-(void)messageInfo:(NSString *)message{
+    
+    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"提示" message:message preferredStyle:UIAlertControllerStyleAlert];
+    
+    UIAlertAction *ok = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil];
+    
+    [alertController addAction:ok];
+    
+    [self presentViewController:alertController animated:YES completion:nil];
+    
+}
+
+#pragma mark --- 将设备码进行转换
+
+-(NSData *)base32Decode:(NSString *)string {
+    
+    GTMStringEncoding *coder = [GTMStringEncoding stringEncodingWithString:kBase32Charset];
+    
+    [coder addDecodeSynonyms:kBase32Synonyms];
+    
+    [coder ignoreCharacters:kBase32Sep];
+    
+    return [coder decode:string];
+}
+
+
+@end

@@ -1,0 +1,193 @@
+//
+//  JumpInputViewController.m
+//  GoogleOpt
+//
+//  Created by jumpapp1 on 2019/10/14.
+//  Copyright © 2019年 zb. All rights reserved.
+//
+
+#import "JumpInputViewController.h"
+#import "JumpCodelistTableViewController.h"
+#import "GTMStringEncoding.h"
+
+@interface JumpInputViewController ()<UITextFieldDelegate>
+
+//生成验证码
+@property (weak, nonatomic) IBOutlet UIButton *getcodeBtn;
+//设备码
+@property (weak, nonatomic) IBOutlet UITextField *codeL;
+//用户名
+@property (weak, nonatomic) IBOutlet UITextField *accountL;
+//设备名
+@property (weak, nonatomic) IBOutlet UITextField *deviceName;
+
+@property (strong,nonatomic) NSMutableArray *codeArray;
+
+@end
+
+@implementation JumpInputViewController
+
+- (void)viewDidLoad {
+    [super viewDidLoad];
+
+    self.navigationItem.title = @"手动输入验证码";
+    
+    self.codeL.delegate = self;
+    self.accountL.delegate = self;
+    self.deviceName.delegate = self;
+        
+    self.codeArray = [NSMutableArray array];
+    
+    //本身有值就先加进去
+    NSArray *array = [[NSUserDefaults standardUserDefaults] objectForKey:@"codeArray"];
+    
+    [self.codeArray addObjectsFromArray:array];
+    
+    self.getcodeBtn.layer.cornerRadius = 5.0;
+}
+
+#pragma mark --- 生成设备码
+
+- (IBAction)getcodeAction:(UIButton *)sender {
+    
+    if(SafeString(self.codeL.text).length < 1){
+
+        [self messageInfo:@"设备码不能为空"];
+
+        return;
+
+    }else if (SafeString(self.accountL.text).length < 1){
+
+        [self messageInfo:@"用户名不能为空"];
+
+        return;
+    
+    }else if (SafeString(self.deviceName.text).length < 1){
+        
+        [self messageInfo:@"设备名不能为空"];
+        
+        return;
+    }
+    
+    BOOL isCodel = [JumpPublicAction specialRight:self.codeL.text];
+    BOOL isAccount = [JumpPublicAction specialRight:self.codeL.text];
+    BOOL isDeviceName = [JumpPublicAction specialRight:self.codeL.text];
+
+    
+    if(isCodel == NO || isAccount == NO || isDeviceName == NO){
+
+        [self messageInfo:@"输入项中包含特殊字符，请检查"];
+
+        return;
+    }
+
+    
+    [self numberStr:self.codeL.text];
+
+}
+
+
+#pragma mark --- 手动输入获取动态码
+
+-(void)numberStr:(NSString *)code{
+    
+//    NSData *secretData = [secret dataUsingEncoding:NSASCIIStringEncoding];
+
+    NSData *secretData = [self base32Decode:code];
+ 
+    TOTPGenerator *generator = [[TOTPGenerator alloc]initWithSecret:secretData algorithm:kOTPGeneratorSHA1Algorithm digits:6 period:60];
+
+
+    NSString *str = [generator generateOTPForDate:nil];//传nil默认为当前时间
+    
+    if(str.length > 0){
+
+        //首页        
+        NSDictionary *dict = @{
+                               @"deviceCode":SafeString(code),
+                               @"code":str,
+                               @"account":SafeString(self.accountL.text),
+                               @"deviceName":SafeString(self.deviceName.text)
+                               };
+
+        
+        [self.codeArray addObject:dict];
+        
+        //存入数组并同步
+        [[NSUserDefaults standardUserDefaults] setObject:self.codeArray forKey:@"codeArray"];
+        
+        [[NSUserDefaults standardUserDefaults] synchronize];
+        
+        if(self.isTimer == NO){
+            
+            [KNotification postNotificationName:@"startTimer" object:nil userInfo:@{@"start":@"1"}];
+            
+        }
+        
+        [KNotification postNotificationName:@"JumpCodelistTableViewController" object:nil userInfo:nil];
+        
+        [self.navigationController popViewControllerAnimated:YES];
+        
+    }else{
+        
+        [self messageInfo:@"输入设备码有误"];
+    }
+  
+}
+
+
+
+#pragma mark -- 提示信息
+
+-(void)messageInfo:(NSString *)message{
+    
+    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"提示" message:message preferredStyle:UIAlertControllerStyleAlert];
+    
+    UIAlertAction *ok = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:nil];
+    
+    [alertController addAction:ok];
+    
+    [self presentViewController:alertController animated:YES completion:nil];
+
+}
+
+
+#pragma mark --- 将设备码进行转换
+
+
+
+-(NSData *)base32Decode:(NSString *)string {
+        
+    GTMStringEncoding *coder = [GTMStringEncoding stringEncodingWithString:kBase32Charset];
+    
+    [coder addDecodeSynonyms:kBase32Synonyms];
+    
+    [coder ignoreCharacters:kBase32Sep];
+    
+    return [coder decode:string];
+}
+
+- (BOOL)textFieldShouldReturn:(UITextField *)textField{
+    
+    [textField resignFirstResponder];
+    
+    return YES;
+}
+
+- (BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string{
+    
+    if(self.accountL.text.length > 9){
+        
+        self.accountL.text = [self.accountL.text substringToIndex:9];
+        
+    }else if (self.deviceName.text.length > 9){
+        
+        self.deviceName.text = [self.deviceName.text substringToIndex:9];
+
+    }
+    
+    return YES;
+}
+
+
+@end
